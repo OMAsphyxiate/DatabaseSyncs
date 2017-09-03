@@ -52,7 +52,13 @@ FROM services
 ClinicServicesINSERT = 'INSERT INTO "Clinic"."Services" VALUES {0} ON CONFLICT (clinicid, servicecode) DO NOTHING'
 
 #Queries for Patient.Appointment
+PatientAppointmentES = 
+PatientAppointmentINSERT = ''
+
 #Queries for Patient.Employer
+PatientEmployerES = 
+PatientEmployerINSERT = ''
+
 #Queries for Patient.Insurance
 PatientInsuranceES = """
 SELECT
