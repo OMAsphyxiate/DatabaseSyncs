@@ -10,6 +10,7 @@ GoogleList = [] #Empty list to store Google IDs
 FacebookList = [] #Empty list to store Facebook IDs
 ClinicList = [] #Empty list to store Clinic IDs
 HostFail = [] #Emptry list to store host issues
+ResultsList = [] #Empty list to store query reqults
 ClinicDict = {} #Empty dictionary to store Clinic ID and host
 
 #Argument Variables
@@ -125,11 +126,11 @@ def BuildInsertPG(GrabQuery,InsertQuery):
 			pass
 		else:
 			for idx, row in enumerate(QueryResults): #For each row of data
-				ListofList.append[i] #Add list for each row with current clinic ID
+				ResultsList.append[i] #Add list for each row with current clinic ID
 				for value in row: #For each individual value in the row
-					ListofList[len(ListofList)-1].append(value) #Add value to last list added
+					ResultsList[len(ResultsList)-1].append(value) #Add value to last list added
 	insertString = ''
-	for item in ListofList:
+	for item in ResultsList:
 		insertString+=str(tuple(item))+',' #Add string tuple version of list to insert string
 	insertString = insertString[:-1] #Remove ending comma
 	insertString = insertString.replace("None","NULL") #Replace Python 'None' with SQL NULL values in string
@@ -138,6 +139,7 @@ def BuildInsertPG(GrabQuery,InsertQuery):
 		PGInsert(injectionString)
 	except:
 		return print("Failed to INSERT: \n %s" % injectionString)
+	return print(HostFail or "Insert Success, No Failed Connections")
 
 
 #Internal Functions
