@@ -117,16 +117,17 @@ def MSInsert(query=None):
 	msconn.close() #Close Connection
 
 #Dynamic Insertion for PG for ES updates
-def BuildInsertPG(GrabQuery,InsertQuery):
-	for i in range(1,len(ClinicDict)+1): #Loop for n iterations of length of list
+def BuildInsertPG(GrabQuery,InsertQuery,TestRange=None):
+	rangeLen = (TestRange or len(ClinicDict)+1)
+	for i in range(1,rangeLen): #Loop for n iterations of length of list
 		hostip = ClinicDict[i] #Set variable to key value
 		QueryResults = ESGrab(hostip,GrabQuery) #Set query results to variable
 		if not QueryResults: #If results are empty
-			HostFail.apend(hostip)
+			HostFail.append(hostip)
 			pass
 		else:
 			for idx, row in enumerate(QueryResults): #For each row of data
-				ResultsList.append[i] #Add list for each row with current clinic ID
+				ResultsList.append([i]) #Add list for each row with current clinic ID
 				for value in row: #For each individual value in the row
 					ResultsList[len(ResultsList)-1].append(value) #Add value to last list added
 	insertString = ''
