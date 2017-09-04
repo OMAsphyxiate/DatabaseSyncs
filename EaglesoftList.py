@@ -1,9 +1,8 @@
 import pyodbc, psycopg2, sys, sqlanydb
-#sys.path.insert(0, 'C:/Users/Christian/Desktop/GitHub/')
+#sys.path.insert(0, 'C:/Users/Reaper/Dropbox/Blah/')
 sys.path.insert(0, 'C:/Users/Christian/Dropbox/Blah/')
-import Connect
-
-ClinicDict = {} #Create blank Dictionary to store query results
+import Connect as ct
+import DBFunctions as dbf
 
 PostgresDatabase = psycopg2.connect("dbname=%s user=%s host=%s password=%s" % ( #Connect to Postgres Database
     Connect.PGDatabase,
@@ -16,7 +15,7 @@ PGCursor.execute('SELECT "ClinicID","eaglesofthost" FROM "Clinic"."Clinic" WHERE
 results = PGCursor.fetchall() #Grab results from Query
 
 for key, value in results: #For each pair of values
-    ClinicDict[key] = value #Create as dictionary entry
+    dbf.ClinicDict[key] = value #Create as dictionary entry
 
 PGCursor.close()
 PostgresDatabase.close()
