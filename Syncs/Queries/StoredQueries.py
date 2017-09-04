@@ -52,8 +52,17 @@ FROM services
 ClinicServicesINSERT = 'INSERT INTO "Clinic"."Services" VALUES {0} ON CONFLICT (clinicid, servicecode) DO NOTHING'
 
 #Queries for Patient.Appointment
-PatientAppointmentES = 
-PatientAppointmentINSERT = ''
+PatientAppointmentES = """
+SELECT 
+	appointment_id,
+	start_time,
+	end_time
+	patient_id,
+	location_id,
+	appointment_type_id
+FROM appointment
+"""
+PatientAppointmentINSERT = 'INSERT INTO "Patient"."Appointment" VALUES {0} ON CONFLICT (clinicid, appointmentid) DO NOTHING'
 
 #Queries for Patient.Employer
 PatientEmployerES = 
