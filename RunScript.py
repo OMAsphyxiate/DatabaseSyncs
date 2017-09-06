@@ -1,5 +1,5 @@
 from DatabaseSyncs import DBFunctions as dbf #Import Functions
-from DatabaseSyncs.Queries import StoredQueries as sq #Import queries
+from DatabaseSyncs.Syncs.Queries import StoredQueries as sq #Import queries
 
 #Insert missing rows for Clinic.Adjustment
 dbf.BuildInsertPG(sq.ClinicAdjustmentES, sq.ClinicAdjustmentINSERT)
