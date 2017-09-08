@@ -63,7 +63,6 @@ def PGSelect(query=None):
 
 #Insert data into PG Server
 def PGInsert(query):
-	starttime = time.time()
 	query = query or noquery #Use class query if no alternative
 	pgconn = pg2.connect( #Establish Connection to DB
 		"dbname=%s user=%s host=%s password=%s" %
@@ -72,7 +71,6 @@ def PGInsert(query):
 	try: #Try INSERT Query
 		pgcurs.execute(query) #Execute query argument
 		pgconn.commit() #Commit INSERT
-		print('%s execution time' % (time.time()-starttime))
 		return True
 	except (pg2.Error,pg2.OperationalError,pg2.DataError,pg2.DatabaseError,pg2.ProgrammingError,pg2.IntegrityError,pg2.InterfaceError,pg2.NotSupportedError,pg2.InternalError) as e:
 		print (e.pgerror)
@@ -141,6 +139,7 @@ def MSInsert(query=None):
 #Dynamic Insertion for PG for ES updates
 def BuildInsertPG(GrabQuery,InsertQuery,TestRange=None):
 	rangeLen = (TestRange or len(ClinicDict)+1)
+	starttime = time.time()
 	HostFail = []
 	ResultsList = []
 	for i in range(1,rangeLen): #Loop for n iterations of length of list
@@ -164,15 +163,17 @@ def BuildInsertPG(GrabQuery,InsertQuery,TestRange=None):
 		ins = PGInsert(injectionString)
 		if ins == True:
 			print(HostFail or "Insert Success, No Failed Connections")
+			print('%s execution time' % (time.time()-starttime))
 		else:
 			raise
 	except:
 		return print("Failed to INSERT")
 
-#Test for failing Inserts
-def BuildInsertTest(GrabQuery,InsertQuery,StartRange=None,EndRange=None):
-	start = (StartRange or 1)
-	end = (EndRange or len(ClinicDict)+1)
+#Dynamic Insertion for PG for ES updates, Staggered # of Clinics
+def BuildInsertPGStagger(GrabQuery,InsertQuery,StartRange=None,EndRange=None):
+	start = (StartRange or 1) #Starting Clinic
+	end = (EndRange+1 or len(ClinicDict)+1) #Ending Clinic
+	starttime = time.time()
 	HostFail = []
 	ResultsList = []
 	for i in range(start,end): #Loop for n iterations of length of list
@@ -196,6 +197,41 @@ def BuildInsertTest(GrabQuery,InsertQuery,StartRange=None,EndRange=None):
 		ins = PGInsert(injectionString)
 		if ins == True:
 			print(HostFail or "Insert Success, No Failed Connections")
+			print('%s execution time' % (time.time()-starttime))
+		else:
+			raise
+	except:
+		return print("Failed to INSERT")
+
+#Test for failing Inserts
+def BuildInsertTest(GrabQuery,InsertQuery,StartRange=None,EndRange=None):
+	start = (StartRange or 1)
+	end = (EndRange or len(ClinicDict)+1)
+	starttime = time.time()
+	HostFail = []
+	ResultsList = []
+	for i in range(start,end): #Loop for n iterations of length of list
+		hostip = ClinicDict[i] #Set variable to key value
+		QueryResults = ESGrab(hostip,GrabQuery) #Set query results to variable
+		if not QueryResults: #If results are empty
+			HostFail.append(hostip)
+			pass
+		else:
+			for idx, row in enumerate(QueryResults): #For each row of data
+				ResultsList.append([i]) #Add list for each row with current clinic ID
+				for value in row: #For each individual value in the row
+					ResultsList[len(ResultsList)-1].append(value) #Add value to last list added
+	insertString = ''
+	for item in ResultsList:
+		insertString+=str(tuple(item))+',' #Add string tuple version of list to insert string
+	insertString = insertString[:-1] #Remove ending comma
+	insertString = insertString.replace("None","NULL") #Replace Python 'None' with SQL NULL values in string
+	injectionString = InsertQuery.format(insertString)
+	try:
+		ins = PGInsert(injectionString)
+		if ins == True:
+			print(HostFail or "Insert Success, No Failed Connections")
+			print('%s execution time' % (time.time()-starttime))
 		else:
 			raise
 	except:

@@ -57,7 +57,7 @@ PatientAppointmentES = """
 SELECT 
 	appointment_id,
 	start_time,
-	end_time
+	end_time,
 	patient_id,
 	location_id,
 	appointment_type_id,
@@ -68,6 +68,7 @@ FROM appointment
 WHERE start_time > '2000-01-01' AND end_time > '2000-01-01'
 """
 PatientAppointmentINSERT = 'INSERT INTO "Patient"."Appointment" VALUES {0} ON CONFLICT (clinicid, appointmentid) DO NOTHING'
+PatientAppointmentFilter = 'AND start_time > GETDATE()-1' #Limit the amount of results queried
 
 #Queries for Patient.Employer
 PatientEmployerES = """
@@ -135,6 +136,7 @@ SELECT
 FROM patient
 """
 PatientPatientINSERT = 'INSERT INTO "Patient"."Patient" VALUES {0} ON CONFLICT (clinicid, patientid) DO NOTHING'
+PatientPatientFilter = 'WHERE patient_id > (SELECT MAX(patient_id)-200 FROM patient)'
 
 #Queries for Patient.Referral
 PatientReferralES = """
