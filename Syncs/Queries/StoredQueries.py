@@ -3,15 +3,63 @@ import sys
 #Queries for Clinic.Adjustment
 ClinicAdjustmentES = 'SELECT adjustment_type_id, description, impacts, IFNULL(central_id, 0) FROM adjustment_type'
 ClinicAdjustmentINSERT = 'INSERT INTO "Clinic"."Adjustment" VALUES {0} ON CONFLICT (clinicid, adjustmentid) DO NOTHING'
+ClinicAdjustmentTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Adjustment"
+
+EXCEPT
+
+SELECT *
+FROM "Clinic"."Adjustment")
+
+INSERT INTO "Clinic"."Adjustment" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, adjustmentid)
+DO NOTHING
+"""
 
 #Queries for Clinic.AppointmentType
 ClinicAppointmentTypeES = 'SELECT type_id, description, amount, appt_minutes FROM appt_types'
 ClinicAppointmentTypeINSERT = 'INSERT INTO "Clinic"."AppointmentType" VALUES {0} ON CONFLICT (clinicid, typeid) DO NOTHING'
+ClinicAppointmentTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."AppointmentType"
+
+EXCEPT
+
+SELECT *
+FROM "Clinic"."AppointmentType")
+
+INSERT INTO "Clinic"."AppointmentType" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, typeid)
+DO NOTHING
+"""
 
 #Queries for Clinic.EOD
 ClinicEODES = 'SELECT eod_sequence, time_ran, start_tran_num, end_tran_num, user_id, eod_description FROM eod'
 ClinicEODFilter = ' WHERE time_ran > GETDATE()-20 ORDER BY eod_sequence DESC'
 ClinicEODINSERT = 'INSERT INTO "Clinic"."EOD" VALUES {0} ON CONFLICT (clinicid, eodsequence) DO NOTHING'
+ClinicEODTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."EOD"
+
+EXCEPT
+
+SELECT *
+FROM "Clinic"."EOD")
+
+INSERT INTO "Clinic"."EOD" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, eodsequence)
+DO NOTHING
+"""
 
 #Queries for Clinic.Paytype
 ClinicPaytypeES = """
@@ -28,10 +76,42 @@ SELECT
 FROM paytype
 """
 ClinicPaytypeINSERT = 'INSERT INTO "Clinic"."Paytype" VALUES {0} ON CONFLICT (clinicid, paytypeid) DO NOTHING'
+ClinicPaytypeTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Paytype"
+
+EXCEPT
+
+SELECT *
+FROM "Clinic"."Paytype")
+
+INSERT INTO "Clinic"."Paytype" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, paytypeid)
+DO NOTHING
+"""
 
 #Queries for Clinic.ReferralType
 ClinicReferralTypeES = 'SELECT other_referral_id, name, status FROM other_referral'
 ClinicReferralTypeINSERT = 'INSERT INTO "Clinic"."ReferralType" VALUES {0} ON CONFLICT (clinicid, referralid) DO NOTHING'
+ClinicReferralTypeTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."ReferralType"
+
+EXCEPT
+
+SELECT *
+FROM "Clinic"."ReferralType")
+
+INSERT INTO "Clinic"."ReferralType" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, referralid)
+DO NOTHING
+"""
 
 #Queries for Clinic.Services
 ClinicServicesES = """
@@ -51,6 +131,22 @@ SELECT
 FROM services
 """
 ClinicServicesINSERT = 'INSERT INTO "Clinic"."Services" VALUES {0} ON CONFLICT (clinicid, servicecode) DO NOTHING'
+ClinicServicesTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Services"
+
+EXCEPT
+
+SELECT *
+FROM "Clinic"."Services")
+
+INSERT INTO "Clinic"."Services" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, servicecode)
+DO NOTHING
+"""
 
 #Queries for Patient.Appointment
 PatientAppointmentES = """
@@ -69,6 +165,9 @@ WHERE start_time > '2000-01-01' AND end_time > '2000-01-01'
 """
 PatientAppointmentINSERT = 'INSERT INTO "Patient"."Appointment" VALUES {0} ON CONFLICT (clinicid, appointmentid) DO NOTHING'
 PatientAppointmentFilter = 'AND start_time > GETDATE()-1' #Limit the amount of results queried
+PatientAppointmentTempCompare = """
+
+"""
 
 #Queries for Patient.Employer
 PatientEmployerES = """
@@ -89,6 +188,25 @@ SELECT
 FROM employer
 """
 PatientEmployerINSERT = 'INSERT INTO "Patient"."Employer" VALUES {0} ON CONFLICT (clinicid, employerid) DO NOTHING'
+PatientEmployerTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Employer"
+
+EXCEPT
+
+SELECT *
+FROM "Patient"."Employer")
+
+INSERT INTO "Patient"."Employer" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Patient"."Insurance" i
+  ON w.clinicid = i.clinicid AND w.insuranceid = i.insuranceid
+WHERE i.insuranceid IS NOT NULL
+ON CONFLICT (clinicid, employerid)
+DO NOTHING
+"""
 
 #Queries for Patient.Insurance
 PatientInsuranceES = """
@@ -106,13 +224,29 @@ SELECT
 FROM insurance_company
 """
 PatientInsuranceINSERT = 'INSERT INTO "Patient"."Insurance" VALUES {0} ON CONFLICT (clinicid, insuranceid) DO NOTHING'
+PatientInsuranceTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Insurance"
+
+EXCEPT
+
+SELECT *
+FROM "Patient"."Insurance")
+
+INSERT INTO "Patient"."Insurance" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, insuranceid)
+DO NOTHING
+"""
 
 #Queries for Patient.Operatory
 PatientOperatoryES = """
 SELECT
 	note_id,
 	patient_id,
-	date_entered
+	date_entered,
 	user_id,
 	note_type,
 	description,
@@ -124,6 +258,9 @@ SELECT
 FROM operatory_notes
 """
 PatientOperatoryINSERT = 'INSERT INTO "Patient"."Operatory" VALUES {0} ON CONFLICT (clinicid, noteid) DO NOTHING'
+PatientOperatoryTempCompare = """
+
+"""
 
 #Queries for Patient.Patient
 PatientPatientES = """
@@ -134,6 +271,25 @@ SELECT
 	date_entered,
 	prim_employer_id
 FROM patient
+"""
+PatientPatientTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Patient"."TempPatient"
+
+EXCEPT
+
+SELECT *
+FROM "Patient"."Patient")
+
+INSERT INTO "Patient"."Patient" AS p
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Patient"."Employer" AS e
+  ON w.clinicid = e.clinicid AND w.employerid = e.employerid
+WHERE e.employerid IS NOT NULL
+ON CONFLICT (clinicid, patientid)
+DO NOTHING
 """
 PatientPatientINSERT = 'INSERT INTO "Patient"."Patient" VALUES {0} ON CONFLICT (clinicid, patientid) DO NOTHING'
 PatientPatientFilter = 'WHERE patient_id > (SELECT MAX(patient_id)-200 FROM patient)'
@@ -149,6 +305,28 @@ SELECT
 FROM referred_by
 """
 PatientReferralINSERT = 'INSERT INTO "Patient"."Referral" VALUES {0} ON CONFLICT (clinicid, patientid) DO NOTHING'
+PatientReferralTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Referral"
+
+EXCEPT
+
+SELECT *
+FROM "Patient"."Referral")
+
+INSERT INTO "Patient"."Referral" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Clinic"."ReferralType" rt
+  ON w.clinicid = rt.clinicid AND w.referralid = rt.referralid
+LEFT JOIN "Patient"."Patient" p
+  ON w.clinicid = p.clinicid AND w.patientid = p.patientid
+WHERE rt.referralid IS NOT NULL
+AND p.patientid IS NOT NULL
+ON CONFLICT (clinicid, patientid, referralid)
+DO NOTHING
+"""
 
 #Queries for Patient.TreatmentItems
 PatientTreatmentItemsES = """
@@ -161,23 +339,64 @@ SELECT
 FROM treatment_plan_items
 """
 PatientTreatmentItemsINSERT = 'INSERT INTO "Patient"."TreatmentItems" VALUES {0} ON CONFLICT (clinicid, treatmentid, lineid) DO NOTHING'
+PatientTreatmentItemsTempCompare = """
+
+"""
 
 #Queries for Patient.TreatmentPlan
 PatientTreatmentPlanES = """
 SELECT
-	treatment_pland_id,
+	treatment_plan_id,
 	patient_id,
 	user_id,
-	description,
+	REPLACE(description,'''','') AS description,
 	status,
 	date_entered
 FROM treatment_plans
 """
 PatientTreatmentPlanINSERT = 'INSERT INTO "Patient"."TreatmentPlan" VALUES {0} ON CONFLICT (clinicid, treatmentid) DO NOTHING'
+PatientTreatmentPlanTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."TreatmentPlan"
+
+EXCEPT
+
+SELECT *
+FROM "Patient"."TreatmentPlan")
+
+INSERT INTO "Patient"."TreatmentPlan" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Patient"."Patient" p
+  ON w.clinicid=p.clinicid AND w.patientid = p.patientid
+LEFT JOIN "Provider"."Provider" pro
+  ON w.clinicid=pro."ClinicID" AND w.userid = pro.providerid
+WHERE p.patientid IS NOT NULL
+AND pro.providerid IS NOT NULL
+ON CONFLICT (clinicid, treatmentid)
+DO NOTHING
+"""
 
 #Queries for Provider.Position
 ProviderPositionES = 'SELECT position_id, description, security_profile FROM positions'
 ProviderPositionINSERT = 'INSERT INTO "Provider"."Position" VALUES {0} ON CONFLICT (clinicid, positionid) DO NOTHING'
+ProviderPositionTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Position"
+
+EXCEPT
+
+SELECT *
+FROM "Provider"."Position")
+
+INSERT INTO "Provider"."Position" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, positionid)
+DO NOTHING
+"""
 
 #Queries for Provider.Provider
 ProviderProviderES = """
@@ -195,6 +414,24 @@ SELECT
 FROM provider
 """
 ProviderProviderINSERT = 'INSERT INTO "Provider"."Provider" VALUES {0} ON CONFLICT ("ClinicID", providerid) DO NOTHING'
+ProviderProviderTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Provider"
+
+EXCEPT
+
+SELECT *
+FROM "Provider"."Provider")
+
+INSERT INTO "Provider"."Provider" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Provider"."Position" AS p
+  ON w."ClinicID" = p.clinicid AND w.positionid=p.positionid
+ON CONFLICT ("ClinicID",providerid)
+DO NOTHING
+"""
 
 #Queries for Trans.InsuranceClaim
 TransInsuranceClaimES = """
@@ -212,6 +449,9 @@ SELECT
 FROM insurance_claim
 """
 TransInsuranceClaimINSERT = 'INSERT INTO "Trans"."InsuranceClaim" VALUES {0} ON CONFLICT ("clinicid", claimid) DO NOTHING'
+TransInsuranceClaimTempCompare = """
+
+"""
 
 #Queries for Trans.InsurancePaid
 TransInsurancePaidES = """
@@ -223,6 +463,9 @@ SELECT
 FROM insurance_claim
 """
 TransInsurancePaidINSERT = 'INSERT INTO "Trans"."InsurancePaid" VALUES {0} ON CONFLICT ("clinicid", claimid) DO NOTHING'
+TransInsurancePaidTempCompare = """
+
+"""
 
 #Queries for Trans.PlannedServices
 TransPlannedServicesES = """
@@ -234,11 +477,14 @@ SELECT
 	provider_id,
 	date_planned,
 	status,
-	description,
+	REPLACE(description,'''',''),
 	sort_order
 FROM planned_services
 """
 TransPlannedServicesINSERT = 'INSERT INTO "Trans"."PlannedServices" VALUES {0} ON CONFLICT ("clinicid", patientid, lineid) DO NOTHING'
+TransPlannedServicesTempCompare = """
+
+"""
 
 #Queries for Trans.TransactionDetail
 TransTransactionDetailES = """
@@ -255,6 +501,9 @@ SELECT
 FROM transactions_detail
 """
 TransTransactionDetailINSERT = 'INSERT INTO "Trans"."TransactionDetail" VALUES {0} ON CONFLICT ("clinicid", trannum, detailid) DO NOTHING'
+TransTransactionDetailTempCompare = """
+
+"""
 
 #Queries for Trans.TransactionHeader
 TransTransactionHeaderES = """
@@ -271,9 +520,12 @@ SELECT
 	claim_id,
 	impacts,
 	type,
-	status,
 	sequence,
-	description
-FROM transaction_header
+	description,
+	status
+FROM transactions_header
 """
 TransTransactionHeaderINSERT = 'INSERT INTO "Trans"."TransactionHeader" VALUES {0} ON CONFLICT ("clinicid", trannum) DO NOTHING'
+TransTransactionHeaderTempCompare = """
+
+"""
