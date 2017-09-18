@@ -164,7 +164,7 @@ FROM appointment
 WHERE start_time > '2000-01-01' AND end_time > '2000-01-01'
 """
 PatientAppointmentINSERT = 'INSERT INTO "Patient"."Appointment" VALUES {0} ON CONFLICT (clinicid, appointmentid) DO NOTHING'
-PatientAppointmentFilter = 'AND start_time > GETDATE()-1' #Limit the amount of results queried
+PatientAppointmentFilter = 'AND start_time > GETDATE()-3' #Limit the amount of results queried
 PatientAppointmentTempCompare = """
 WITH CTE_Exception AS(
 SELECT *

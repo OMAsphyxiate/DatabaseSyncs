@@ -2,7 +2,7 @@ import sys, datetime, facebook
 from DatabaseSyncs import DBFunctions as dbf
 import Connect as ct
 
-daterange = datetime.datetime.now() - datetime.timedelta(days=30)
+daterange = datetime.datetime.now() - datetime.timedelta(days=60)
 graph = facebook.GraphAPI(ct.FACEBOOK_USER_TOKEN)
 
 #Post Level - Consumption Type
