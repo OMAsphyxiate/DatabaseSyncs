@@ -66,7 +66,7 @@ ClinicPaytypeES = """
 SELECT 
 	paytype_id, 
 	sequence, 
-	description, 
+	REPLACE(description,'''','') AS description,
 	IFNULL(prompt,'',prompt), 
 	display_on_payment_screen, 
 	currency_type, 
@@ -118,7 +118,7 @@ ClinicServicesES = """
 SELECT 
 	service_code,
 	IFNULL(ada_code,'',ada_code),
-	description,
+	REPLACE(description,'''','') AS description,
 	CAST(IFNULL(service_type_id,'0',service_type_id) AS INT),
 	impacted_area,
 	REPLACE(IFNULL(smart_code1,'NULL',smart_code1),'''',''),
@@ -166,7 +166,26 @@ WHERE start_time > '2000-01-01' AND end_time > '2000-01-01'
 PatientAppointmentINSERT = 'INSERT INTO "Patient"."Appointment" VALUES {0} ON CONFLICT (clinicid, appointmentid) DO NOTHING'
 PatientAppointmentFilter = 'AND start_time > GETDATE()-1' #Limit the amount of results queried
 PatientAppointmentTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Appointment"
 
+EXCEPT
+
+SELECT *
+FROM "Patient"."Appointment")
+
+INSERT INTO "Patient"."Appointment" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Patient"."Patient" pat
+  ON w.clinicid = pat.clinicid AND w.patientid = pat.patientid
+LEFT JOIN "Clinic"."AppointmentType" apt
+  ON w.clinicid = apt.clinicid AND w.typeid = apt.typeid
+WHERE pat.patientid IS NOT NULL
+AND apt.typeid IS NOT NULL
+ON CONFLICT (clinicid, appointmentid)
+DO NOTHING
 """
 
 #Queries for Patient.Employer
@@ -249,7 +268,7 @@ SELECT
 	date_entered,
 	user_id,
 	note_type,
-	description,
+	REPLACE(description,'''','') AS description,
 	locked_eod,
 	status,
 	claim_id,
@@ -259,7 +278,20 @@ FROM operatory_notes
 """
 PatientOperatoryINSERT = 'INSERT INTO "Patient"."Operatory" VALUES {0} ON CONFLICT (clinicid, noteid) DO NOTHING'
 PatientOperatoryTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."Operatory"
 
+EXCEPT
+
+SELECT *
+FROM "Patient"."Operatory")
+
+INSERT INTO "Patient"."Operatory" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+ON CONFLICT (clinicid, noteid)
+DO NOTHING
 """
 
 #Queries for Patient.Patient
@@ -340,7 +372,29 @@ FROM treatment_plan_items
 """
 PatientTreatmentItemsINSERT = 'INSERT INTO "Patient"."TreatmentItems" VALUES {0} ON CONFLICT (clinicid, treatmentid, lineid) DO NOTHING'
 PatientTreatmentItemsTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."TreatmentItems"
 
+EXCEPT
+
+SELECT *
+FROM "Patient"."TreatmentItems")
+
+INSERT INTO "Patient"."TreatmentItems" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Patient"."Patient" rt
+  ON w.clinicid = rt.clinicid AND w.patientid = rt.patientid
+LEFT JOIN "Patient"."Patient" p
+  ON w.clinicid = p.clinicid AND w.patientid = p.patientid
+LEFT JOIN "Patient"."TreatmentPlan" tp
+  ON w.clinicid = tp.clinicid AND w.treatmentid = tp.treatmentid
+WHERE rt.patientid IS NOT NULL
+AND p.patientid IS NOT NULL
+AND tp.treatmentid IS NOT NULL
+ON CONFLICT (clinicid, treatmentid, lineid)
+DO NOTHING
 """
 
 #Queries for Patient.TreatmentPlan
@@ -450,7 +504,26 @@ FROM insurance_claim
 """
 TransInsuranceClaimINSERT = 'INSERT INTO "Trans"."InsuranceClaim" VALUES {0} ON CONFLICT ("clinicid", claimid) DO NOTHING'
 TransInsuranceClaimTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."InsuranceClaim"
 
+EXCEPT
+
+SELECT *
+FROM "Trans"."InsuranceClaim")
+
+INSERT INTO "Trans"."InsuranceClaim" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Patient"."Patient" p
+  ON w.clinicid = p.clinicid AND w.patientid = p.patientid
+LEFT JOIN "Provider"."Provider" pro
+  ON w.clinicid = pro."ClinicID" AND w.providerid = pro.providerid
+WHERE p.patientid IS NOT NULL
+AND pro.providerid IS NOT NULL
+ON CONFLICT (clinicid, claimid)
+DO NOTHING
 """
 
 #Queries for Trans.InsurancePaid
@@ -464,7 +537,23 @@ FROM insurance_claim
 """
 TransInsurancePaidINSERT = 'INSERT INTO "Trans"."InsurancePaid" VALUES {0} ON CONFLICT ("clinicid", claimid) DO NOTHING'
 TransInsurancePaidTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."InsurancePaid"
 
+EXCEPT
+
+SELECT *
+FROM "Trans"."InsurancePaid")
+
+INSERT INTO "Trans"."InsurancePaid" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Trans"."InsuranceClaim" ic
+  ON w.clinicid = ic.clinicid AND w.claimid = ic.claimid
+WHERE ic.claimid IS NOT NULL
+ON CONFLICT (clinicid, claimid)
+DO NOTHING
 """
 
 #Queries for Trans.PlannedServices
@@ -483,7 +572,25 @@ FROM planned_services
 """
 TransPlannedServicesINSERT = 'INSERT INTO "Trans"."PlannedServices" VALUES {0} ON CONFLICT ("clinicid", patientid, lineid) DO NOTHING'
 TransPlannedServicesTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."PlannedServices"
 
+EXCEPT
+
+SELECT *
+FROM "Trans"."PlannedServices")
+INSERT INTO "Trans"."PlannedServices" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Patient"."Patient" p
+  ON w.clinicid = p.clinicid AND w.patientid = p.patientid
+LEFT JOIN "Provider"."Provider" pro
+  ON w.clinicid = pro."ClinicID" AND w.providerid = pro.providerid
+WHERE p.patientid IS NOT NULL
+AND pro.providerid IS NOT NULL
+ON CONFLICT (clinicid, patientid, lineid)
+DO NOTHING
 """
 
 #Queries for Trans.TransactionDetail
@@ -502,7 +609,29 @@ FROM transactions_detail
 """
 TransTransactionDetailINSERT = 'INSERT INTO "Trans"."TransactionDetail" VALUES {0} ON CONFLICT ("clinicid", trannum, detailid) DO NOTHING'
 TransTransactionDetailTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."TransactionDetail"
 
+EXCEPT
+
+SELECT *
+FROM "Trans"."TransactionDetail")
+
+INSERT INTO "Trans"."TransactionDetail" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Trans"."TransactionHeader" th
+  ON w.clinicid = th.clinicid AND w.trannum = th.trannum
+LEFT JOIN "Patient"."Patient" pat
+  ON w.clinicid = pat.clinicid AND w.patientid = pat.patientid
+LEFT JOIN "Provider"."Provider" pro
+  ON w.clinicid = pro."ClinicID" AND w.providerid = pro.providerid
+WHERE th.trannum IS NOT NULL
+AND pat.patientid IS NOT NULL
+AND pro.providerid IS NOT NULL
+ON CONFLICT (clinicid, trannum, detailid)
+DO NOTHING
 """
 
 #Queries for Trans.TransactionHeader
@@ -521,11 +650,43 @@ SELECT
 	impacts,
 	type,
 	sequence,
-	description,
+	REPLACE(description,'''','') AS description,
 	status
 FROM transactions_header
 """
 TransTransactionHeaderINSERT = 'INSERT INTO "Trans"."TransactionHeader" VALUES {0} ON CONFLICT ("clinicid", trannum) DO NOTHING'
 TransTransactionHeaderTempCompare = """
+WITH CTE_Exception AS(
+SELECT *
+FROM "Temp"."TransactionHeader"
 
+EXCEPT
+
+SELECT *
+FROM "Trans"."TransactionHeader")
+
+INSERT INTO "Trans"."TransactionHeader" AS ca
+SELECT w.*
+FROM CTE_Exception AS w
+LEFT JOIN "Provider"."Provider" pro
+   ON w.clinicid = pro."ClinicID" AND w.userid = pro.providerid
+LEFT JOIN "Patient"."Patient" pat
+   ON w.clinicid = pat.clinicid AND w.responsibleparty = pat.patientid
+LEFT JOIN "Clinic"."Services" serv
+   ON w.clinicid = serv.clinicid AND w.servicecode = serv.servicecode
+WHERE pro.providerid IS NOT NULL
+AND pat.patientid IS NOT NULL
+AND serv.servicecode IS NOT NULL
+AND (w.paytypeid IS NULL
+     OR EXISTS (SELECT pay.paytypeid
+      FROM "Clinic"."Paytype" pay
+      WHERE pay.clinicid = w.clinicid
+      AND pay.paytypeid = w.paytypeid))
+AND (w.adjustmentid IS NULL
+     OR EXISTS(SELECT adj.adjustmentid
+      FROM "Clinic"."Adjustment" adj
+      WHERE adj.clinicid = w.clinicid
+      AND adj.adjustmentid = w.adjustmentid))
+ON CONFLICT (clinicid, trannum)
+DO NOTHING
 """

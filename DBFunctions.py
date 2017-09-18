@@ -233,7 +233,8 @@ def BuildInsertPGTemp(GrabQuery,TempTable,CentralTable,TempCompare,StartRange=No
 	tempDrop = DropTemp.format(TempTable) #Check if temporary Table exists
 	tempCreate = CreateTemp.format(TempTable,CentralTable)
 	tempCounter = CountTemp.format(TempTable)
-	if PGSelect(tempCheck) == 1:
+	checker = PGSelect(tempCheck)
+	if checker[0][0] == 1:
 		PGExecute(tempDrop)
 	starttime = time.time()
 	HostFail = []
