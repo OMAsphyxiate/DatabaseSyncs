@@ -90,7 +90,7 @@ def PGSelect(query=None):
 
 #Insert data into PG Server
 def PGInsert(query):
-	query = query or noquery #Use class query if no alternative
+	query = query.encode('utf-8') or noquery #Use class query if no alternative
 	pgconn = pg2.connect( #Establish Connection to DB
 		"dbname=%s user=%s host=%s password=%s" %
 		(ct.PGDatabase,ct.PGUID,ct.PGHost,ct.PGPWD))

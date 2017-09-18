@@ -71,7 +71,7 @@ def PostConsumptionType():
 				var11 = 0
 			insertString = dbf.TupleList(dbf.ListShaping(PostConsumptionTypeList,(str(item),var1,var2,var3,var4,var5,var6,var7,var8,var9,var10,var11))) #Write data to file
 
-	injectionString = PostConsumptionTypeInsert.format(insertString)
+	injectionString = PostConsumptionTypeInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -92,9 +92,12 @@ def PostConsumptionUnique():
 
 		for post in posts['data']:
 			var1 = post['id']
-			var2 = post['permalink_url']
 			try:
-				var3 = post['message'].replace('\n',' ')
+				var2 = post['permalink_url']
+			except:
+				var2 = 'No Permanent Link'
+			try:
+				var3 = post['message'].replace('\n',' ').replace('"','').replace('\'','')
 			except:
 				var3 = 'No Message'
 			try:
@@ -127,7 +130,7 @@ def PostConsumptionUnique():
 			except:
 				var11 = 0
 			insertString = dbf.TupleList(dbf.ListShaping(PostConsumptionUniqueList,(str(item),var1,var2,var3,var4,var5,var6,var7,var8,var9,var10,var11)))#Write data to file
-	injectionString = PostConsumptionUniqueInsert.format(insertString)
+	injectionString = PostConsumptionUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -175,9 +178,12 @@ def PostNegativeFeedbackType():
 
 		for post in posts['data']	:
 			var1 = post['id']
-			var2 = post['permalink_url']
 			try:
-				var3 = post['message'].replace('\n',' ')
+				var2 = post['permalink_url']
+			except:
+				var2 = 'No Permanent Link'
+			try:
+				var3 = post['message'].replace('\n',' ').replace('\'','')
 			except:
 				var3 = 'No Message'
 			try:
@@ -218,7 +224,7 @@ def PostNegativeFeedbackType():
 			except:
 				var10 = 0
 			insertString = dbf.TupleList(dbf.ListShaping(PostNegativeFeedbackTypeList,(str(item),var1,var2,var3,var4,var5,var6,var7,var8,var9,var10))) #Write data to file
-	injectionString = PostNegativeFeedbackTypeInsert.format(insertString)
+	injectionString = PostNegativeFeedbackTypeInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -238,7 +244,10 @@ def PostNegativeFeedbackTypeUnique():
 		posts = graph.get_connections(profile['id'], 'posts?fields=id,permalink_url,message,type,created_time,insights.metric(post_negative_feedback_by_type_unique).period(lifetime)')	
 		for post in posts['data']:
 			var1 = post['id']
-			var2 = post['permalink_url']
+			try:
+				var2 = post['permalink_url']
+			except:
+				var2 = 'No Permanent Link'
 			try:
 				var3 = post['message'].replace('\n',' ')
 			except:
@@ -281,7 +290,7 @@ def PostNegativeFeedbackTypeUnique():
 			except:
 				var10 = 0
 			insertString = dbf.TupleList(dbf.ListShaping(PostNegativeFeedbackTypeUniqueList,(str(item),var1,var2,var3,var4,var5,var6,var7,var8,var9,var10))) #Write data to file
-	injectionString = PostNegativeFeedbackTypeUniqueInsert.format(insertString)
+	injectionString = PostNegativeFeedbackTypeUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -344,7 +353,7 @@ def PostStoryActionType():
 				except:
 					var10 = 0
 				insertString = dbf.TupleList(dbf.ListShaping(PostStoryActionTypeList,(str(item),var1,var2,var3,var4,var5,var6,var7,var8,var9,var10))) #Write data to file
-	injectionString = PostStoryActionTypeInsert.format(insertString)
+	injectionString = PostStoryActionTypeInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -407,7 +416,7 @@ def PostStoryActionTypeUnique():
 			except:
 				var10 = 0
 			insertString = dbf.TupleList(dbf.ListShaping(PostStoryActionTypeUniqueList,(str(item),var1,var2,var3,var4,var5,var6,var7,var8,var9,var10))) #Write data to file
-	injectionString = PostStoryActionTypeUniqueInsert.format(insertString)
+	injectionString = PostStoryActionTypeUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -454,7 +463,7 @@ def RawConsumptionByType():
 					var24 = 0
 				var25 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawConsumptionByTypeList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25)))
-	injectionString = RawConsumptionByTypeInsert.format(insertString)
+	injectionString = RawConsumptionByTypeInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -480,7 +489,7 @@ def RawExternalReferral():
 						insertString = dbf.TupleList(dbf.ListShaping(RawExternalReferralList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
 				else:
 					pass
-	injectionString = RawExternalReferralInsert.format(insertString)
+	injectionString = RawExternalReferralInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -592,7 +601,7 @@ def RawFansByAgeGender():
 					var40 = 0
 				var41 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawFansByAgeGenderList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28,var29,var30,var31,var32,var33,var34,var35,var36,var37,var38,var39,var40,var41)))
-	injectionString = RawFansByAgeGenderInsert.format(insertString)
+	injectionString = RawFansByAgeGenderInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -615,7 +624,7 @@ def RawFansByCity():
 			for entry in post['values']:
 				for key, value in entry['value'].items():
 					insertString = dbf.TupleList(dbf.ListShaping(RawFansByCityList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
-	injectionString = RawFansByCityInsert.format(insertString)
+	injectionString = RawFansByCityInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -638,7 +647,7 @@ def RawFansByCountry():
 			for entry in post['values']:
 				for key, value in entry['value'].items():
 					insertString = dbf.TupleList(dbf.ListShaping(RawFansByCountryList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
-	injectionString = RawFansByCountryInsert.format(insertString)
+	injectionString = RawFansByCountryInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -664,7 +673,7 @@ def RawFansByLikeSource():
 						insertString = dbf.TupleList(dbf.ListShaping(RawFansByLikeSourceList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
 				else:
 					pass
-	injectionString = RawFansByLikeSourceInsert.format(insertString)
+	injectionString = RawFansByLikeSourceInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -690,7 +699,7 @@ def RawFansByLocale():
 						insertString = dbf.TupleList(dbf.ListShaping(RawFansByLocaleList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
 				else:
 					pass
-	injectionString = RawFansByLocaleInsert.format(insertString)
+	injectionString = RawFansByLocaleInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -810,7 +819,7 @@ def RawFansLikedOnline():
 					var42 = 0
 				var43 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawFansLikedOnlineList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28,var29,var30,var31,var32,var33,var34,var35,var36,var37,var38,var39,var40,var41,var42,var43)))
-	injectionString = RawFansLikedOnlineInsert.format(insertString)
+	injectionString = RawFansLikedOnlineInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -870,7 +879,7 @@ def RawImpressionFrequencyDistribution():
 					var27 = 0
 				var28 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawImpressionFrequencyDistributionList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28)))
-	injectionString = RawImpressionFrequencyDistributionInsert.format(insertString)
+	injectionString = RawImpressionFrequencyDistributionInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -982,7 +991,7 @@ def RawImpressionByAgeGender():
 					var40 = 0
 				var41 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawImpressionByAgeGenderList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28,var29,var30,var31,var32,var33,var34,var35,var36,var37,var38,var39,var40,var41)))
-	injectionString = RawImpressionByAgeGenderInsert.format(insertString)
+	injectionString = RawImpressionByAgeGenderInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1009,7 +1018,7 @@ def RawKeyMetrics():
 				except:
 					e = sys.exc_info()[0]
 					print( "<p>Error: %s</p>" % e )
-	injectionString = RawKeyMetricsInsert.format(insertString)
+	injectionString = RawKeyMetricsInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1057,7 +1066,7 @@ def RawNegativeFeedbackByType():
 					var24 = 0
 				var25 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawNegativeFeedbackByTypeList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25)))
-	injectionString = RawNegativeFeedbackByTypeInsert.format(insertString)
+	injectionString = RawNegativeFeedbackByTypeInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1105,7 +1114,7 @@ def RawNegativeFeedbackByTypeUnique():
 					var24 = 0
 				var25 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawNegativeFeedbackByTypeUniqueList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25)))
-	injectionString = RawNegativeFeedbackByTypeUniqueInsert.format(insertString)
+	injectionString = RawNegativeFeedbackByTypeUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1157,7 +1166,7 @@ def RawPositiveFeedbackByType():
 					var25 = 0
 				var26 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawPositiveFeedbackByTypeList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26)))
-	injectionString = RawPositiveFeedbackByTypeInsert.format(insertString)
+	injectionString = RawPositiveFeedbackByTypeInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1209,7 +1218,7 @@ def RawPositiveFeedbackByTypeUnique():
 					var25 = 0
 				var26 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawPositiveFeedbackByTypeUniqueList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26)))
-	injectionString = RawPositiveFeedbackByTypeUniqueInsert.format(insertString)
+	injectionString = RawPositiveFeedbackByTypeUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1269,7 +1278,7 @@ def RawStoriesByStoryType():
 					var27 = 0
 				var28 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawStoriesByStoryTypeList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28)))
-	injectionString = RawStoriesByStoryTypeInsert.format(insertString)
+	injectionString = RawStoriesByStoryTypeInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1381,7 +1390,7 @@ def RawStoryByAgeGenderUnique():
 					var40 = 0
 				var41 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawStoryByAgeGenderUniqueList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28,var29,var30,var31,var32,var33,var34,var35,var36,var37,var38,var39,var40,var41)))
-	injectionString = RawStoryByAgeGenderUniqueInsert.format(insertString)
+	injectionString = RawStoryByAgeGenderUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1404,7 +1413,7 @@ def RawStoryByCityUnique():
 			for entry in post['values']:
 				for key, value in entry['value'].items():
 					insertString = dbf.TupleList(dbf.ListShaping(RawStoryByCityUniqueList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
-	injectionString = RawStoryByCityUniqueInsert.format(insertString)
+	injectionString = RawStoryByCityUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1427,7 +1436,7 @@ def RawStoryByCountryUnique():
 			for entry in post['values']:
 				for key, value in entry['value'].items():
 					insertString = dbf.TupleList(dbf.ListShaping(RawStoryByCountryUniqueList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
-	injectionString = RawStoryByCountryUniqueInsert.format(insertString)
+	injectionString = RawStoryByCountryUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1539,7 +1548,7 @@ def RawStorytellerByAgeGender():
 					var40 = 0
 				var41 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawStorytellerByAgeGenderList,(str(item), var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28,var29,var30,var31,var32,var33,var34,var35,var36,var37,var38,var39,var40,var41)))
-	injectionString = RawStorytellerByAgeGenderInsert.format(insertString)
+	injectionString = RawStorytellerByAgeGenderInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1562,7 +1571,7 @@ def RawStorytellerByCountry():
 			for entry in post['values']:
 				for key, value in entry['value'].items():
 					insertString = dbf.TupleList(dbf.ListShaping(RawStorytellerByCountryList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
-	injectionString = RawStorytellerByCountryInsert.format(insertString)
+	injectionString = RawStorytellerByCountryInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1588,7 +1597,7 @@ def RawStorytellerByLocale():
 						insertString = dbf.TupleList(dbf.ListShaping(RawStorytellerByLocaleList,(str(item),post['name'],post['period'],post['title'],post['description'],post['id'],key,value,entry['end_time'])))
 				else:
 					pass
-	injectionString = RawStorytellerByLocaleInsert.format(insertString)
+	injectionString = RawStorytellerByLocaleInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:
@@ -1668,7 +1677,7 @@ def RawTabViewLoginUnique():
 					var32 = 0
 				var33 = value['end_time']
 				insertString = dbf.TupleList(dbf.ListShaping(RawTabViewLoginUniqueList,(str(item),var1,var2,var3,var4,var5,var20,var21,var22,var23,var24,var25,var26,var27,var28,var29,var30,var31,var32,var33)))
-	injectionString = RawTabViewLoginUniqueInsert.format(insertString)
+	injectionString = RawTabViewLoginUniqueInsert.format(insertString.replace('"','\''))
 	try:
 		ins = dbf.PGInsert(injectionString)
 		if ins == True:

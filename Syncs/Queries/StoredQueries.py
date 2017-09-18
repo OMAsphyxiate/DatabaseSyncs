@@ -307,7 +307,7 @@ FROM patient
 PatientPatientTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
-FROM "Patient"."TempPatient"
+FROM "Temp"."Patient"
 
 EXCEPT
 
