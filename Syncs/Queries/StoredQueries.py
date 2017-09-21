@@ -277,6 +277,7 @@ SELECT
 FROM operatory_notes
 """
 PatientOperatoryINSERT = 'INSERT INTO "Patient"."Operatory" VALUES {0} ON CONFLICT (clinicid, noteid) DO NOTHING'
+PatientOperatoryFilter = ' WHERE freshness > GETDATE() - 7'
 PatientOperatoryTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
@@ -371,6 +372,7 @@ SELECT
 FROM treatment_plan_items
 """
 PatientTreatmentItemsINSERT = 'INSERT INTO "Patient"."TreatmentItems" VALUES {0} ON CONFLICT (clinicid, treatmentid, lineid) DO NOTHING'
+PatientTreatmentItemsFilter = ' WHERE treatment_plan_id > (SELECT MAX(treatment_plan_id)-100 FROM treatment_plan_items)'
 PatientTreatmentItemsTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
@@ -409,6 +411,7 @@ SELECT
 FROM treatment_plans
 """
 PatientTreatmentPlanINSERT = 'INSERT INTO "Patient"."TreatmentPlan" VALUES {0} ON CONFLICT (clinicid, treatmentid) DO NOTHING'
+PatientTreatmentPlanFilter = ' WHERE date_entered > GETDATE()-7'
 PatientTreatmentPlanTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
@@ -503,6 +506,7 @@ SELECT
 FROM insurance_claim
 """
 TransInsuranceClaimINSERT = 'INSERT INTO "Trans"."InsuranceClaim" VALUES {0} ON CONFLICT ("clinicid", claimid) DO NOTHING'
+TransInsuranceClaimFilter = ' WHERE date_created > GETDATE()-7'
 TransInsuranceClaimTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
@@ -534,6 +538,7 @@ SELECT
 	prim_total_paid,
 	sec_total_paid
 FROM insurance_claim
+WHERE prim_total_paid <> 0 OR sec_total_paid <> 0
 """
 TransInsurancePaidINSERT = 'INSERT INTO "Trans"."InsurancePaid" VALUES {0} ON CONFLICT ("clinicid", claimid) DO NOTHING'
 TransInsurancePaidTempCompare = """
@@ -571,6 +576,7 @@ SELECT
 FROM planned_services
 """
 TransPlannedServicesINSERT = 'INSERT INTO "Trans"."PlannedServices" VALUES {0} ON CONFLICT ("clinicid", patientid, lineid) DO NOTHING'
+TransPlannedServicesFilter = ' WHERE status_date > GETDATE()-7'
 TransPlannedServicesTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
@@ -608,6 +614,7 @@ SELECT
 FROM transactions_detail
 """
 TransTransactionDetailINSERT = 'INSERT INTO "Trans"."TransactionDetail" VALUES {0} ON CONFLICT ("clinicid", trannum, detailid) DO NOTHING'
+TransTransactionDetailFilter = ' WHERE tran_num > (SELECT MAX(tran_num)-200 FROM transactions_header)'
 TransTransactionDetailTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
@@ -655,6 +662,7 @@ SELECT
 FROM transactions_header
 """
 TransTransactionHeaderINSERT = 'INSERT INTO "Trans"."TransactionHeader" VALUES {0} ON CONFLICT ("clinicid", trannum) DO NOTHING'
+TransTransactionHeaderFilter = ' WHERE tran_num > (SELECT MAX(tran_num)-200 FROM transactions_header)'
 TransTransactionHeaderTempCompare = """
 WITH CTE_Exception AS(
 SELECT *

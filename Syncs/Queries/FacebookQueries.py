@@ -21,7 +21,7 @@ def PostConsumptionType():
 			except:
 				var2 = 'No URL'
 			try:
-				var3 = post['message'].replace("'","").replace('\n',' ')
+				var3 = post['message'].replace("'","").replace('\n',' ').replace('"','')
 			except:
 				var3 = 'No Message'
 			try:
@@ -97,7 +97,7 @@ def PostConsumptionUnique():
 			except:
 				var2 = 'No Permanent Link'
 			try:
-				var3 = post['message'].replace('\n',' ').replace('"','').replace('\'','')
+				var3 = post['message'].replace("'","").replace('\n',' ').replace('"','')
 			except:
 				var3 = 'No Message'
 			try:
@@ -183,7 +183,7 @@ def PostNegativeFeedbackType():
 			except:
 				var2 = 'No Permanent Link'
 			try:
-				var3 = post['message'].replace('\n',' ').replace('\'','')
+				var3 = post['message'].replace("'","").replace('\n',' ').replace('"','')
 			except:
 				var3 = 'No Message'
 			try:
@@ -249,7 +249,7 @@ def PostNegativeFeedbackTypeUnique():
 			except:
 				var2 = 'No Permanent Link'
 			try:
-				var3 = post['message'].replace('\n',' ')
+				var3 = post['message'].replace("'","").replace('\n',' ').replace('"','')
 			except:
 				var3 = 'No Message'
 			try:
@@ -310,9 +310,12 @@ def PostStoryActionType():
 		posts = graph.get_connections(profile['id'], 'posts?fields=id,permalink_url,message,type,created_time,insights.metric(post_story_adds_by_action_type).period(lifetime)')
 		for post in posts['data']:
 				var1 = post['id']
-				var2 = post['permalink_url']
 				try:
-					var3 = post['message'].replace('\n',' ')
+					var2 = post['permalink_url']
+				except:
+					var2 = 'No Permanent Link'
+				try:
+					var3 = post['message'].replace("'","").replace('\n',' ').replace('"','')
 				except:
 					var3 = 'No Message'
 				try:
@@ -373,9 +376,12 @@ def PostStoryActionTypeUnique():
 		posts = graph.get_connections(profile['id'], 'posts?fields=id,permalink_url,message,type,created_time,insights.metric(post_story_adds_by_action_type_unique).period(lifetime)')
 		for post in posts['data']:
 			var1 = post['id']
-			var2 = post['permalink_url']
 			try:
-				var3 = post['message'].replace('\n',' ')
+				var2 = post['permalink_url']
+			except:
+				var2 = 'No Permanent Link'
+			try:
+				var3 = post['message'].replace("'","").replace('\n',' ').replace('"','')
 			except:
 				var3 = 'No Message'
 			try:
