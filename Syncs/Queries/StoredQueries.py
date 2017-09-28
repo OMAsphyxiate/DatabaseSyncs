@@ -17,7 +17,10 @@ INSERT INTO "Clinic"."Adjustment" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, adjustmentid)
-DO NOTHING
+DO UPDATE
+SET impacts = EXCLUDED.impacts,
+  adjustmentdesc = EXCLUDED.adjustmentdesc,
+  centralid = EXCLUDED.centralid
 """
 
 #Queries for Clinic.AppointmentType
@@ -37,7 +40,10 @@ INSERT INTO "Clinic"."AppointmentType" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, typeid)
-DO NOTHING
+DO UPDATE
+  SET appointmentdesc = EXCLUDED.appointmentdesc,
+    amount = EXCLUDED.amount,
+    appointmentminutes = EXCLUDED.appointmentminutes
 """
 
 #Queries for Clinic.EOD
@@ -58,7 +64,13 @@ INSERT INTO "Clinic"."EOD" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, eodsequence)
-DO NOTHING
+DO UPDATE
+  SET
+    timeran = EXCLUDED.timeran,
+    starttran = EXCLUDED.starttran,
+    endtran = EXCLUDED.endtran,
+    userid = EXCLUDED.userid,
+    eoddesc = EXCLUDED.eoddesc
 """
 
 #Queries for Clinic.Paytype
@@ -90,7 +102,15 @@ INSERT INTO "Clinic"."Paytype" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, paytypeid)
-DO NOTHING
+DO UPDATE
+  SET
+    sequence = EXCLUDED.sequence,
+    prompt = EXCLUDED.prompt,
+    displayscreen = EXCLUDED.displayscreen,
+    currencytype = EXCLUDED.currencytype,
+    includedeposit = EXCLUDED.includedeposit,
+    centralid = EXCLUDED.centralid,
+    systemreq = EXCLUDED.systemreq
 """
 
 #Queries for Clinic.ReferralType
@@ -110,13 +130,16 @@ INSERT INTO "Clinic"."ReferralType" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, referralid)
-DO NOTHING
+DO UPDATE
+  SET
+    referraldesc = EXCLUDED.referraldesc,
+    status = EXCLUDED.status
 """
 
 #Queries for Clinic.Services
 ClinicServicesES = """
 SELECT 
-	service_code,
+	UPPER(service_code) AS service_code,
 	IFNULL(ada_code,'',ada_code),
 	REPLACE(description,'''','') AS description,
 	CAST(IFNULL(service_type_id,'0',service_type_id) AS INT),
@@ -145,7 +168,19 @@ INSERT INTO "Clinic"."Services" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, servicecode)
-DO NOTHING
+DO UPDATE
+  SET
+    adacode = EXCLUDED.adacode,
+    servicedesc = EXCLUDED.servicedesc,
+    servicetype = EXCLUDED.servicetype,
+    impactedarea = EXCLUDED.impactedarea,
+    smartcode1 = EXCLUDED.smartcode1,
+    smartcode2 = EXCLUDED.smartcode2,
+    smartcode3 = EXCLUDED.smartcode3,
+    smartcode4 = EXCLUDED.smartcode4,
+    smartcode5 = EXCLUDED.smartcode5,
+    sequence = EXCLUDED.sequence,
+    fee = EXCLUDED.fee
 """
 
 #Queries for Patient.Appointment
@@ -182,10 +217,19 @@ LEFT JOIN "Patient"."Patient" pat
   ON w.clinicid = pat.clinicid AND w.patientid = pat.patientid
 LEFT JOIN "Clinic"."AppointmentType" apt
   ON w.clinicid = apt.clinicid AND w.typeid = apt.typeid
-WHERE pat.patientid IS NOT NULL
-AND apt.typeid IS NOT NULL
+WHERE (w.patientid IS NULL OR pat.patientid IS NOT NULL)
+AND (w.typeid IS NULL OR apt.typeid IS NOT NULL)
 ON CONFLICT (clinicid, appointmentid)
-DO NOTHING
+DO UPDATE
+  SET
+    starttime = EXCLUDED.starttime,
+    endtime = EXCLUDED.endtime,
+    patientid = EXCLUDED.patientid,
+    locationid = EXCLUDED.locationid,
+    typeid = EXCLUDED.typeid,
+    "ArrivalTime" = EXCLUDED."ArrivalTime",
+    "InchairTime" = EXCLUDED."InchairTime",
+    "WalkoutTime" = EXCLUDED."WalkoutTime"
 """
 
 #Queries for Patient.Employer
@@ -224,7 +268,20 @@ LEFT JOIN "Patient"."Insurance" i
   ON w.clinicid = i.clinicid AND w.insuranceid = i.insuranceid
 WHERE i.insuranceid IS NOT NULL
 ON CONFLICT (clinicid, employerid)
-DO NOTHING
+DO UPDATE
+  SET
+    name = EXCLUDED.name,
+    address = EXCLUDED.address,
+    city = EXCLUDED.city,
+    state = EXCLUDED.state,
+    zipcode = EXCLUDED.zipcode,
+    phone = EXCLUDED.phone,
+    fax = EXCLUDED.fax,
+    groupid = EXCLUDED.groupid,
+    insuranceid = EXCLUDED.insuranceid,
+    maxcoverage = EXCLUDED.maxcoverage,
+    yearlydeductible = EXCLUDED.yearlydeductible,
+    "GroupName" = EXCLUDED."GroupName"
 """
 
 #Queries for Patient.Insurance
@@ -257,7 +314,17 @@ INSERT INTO "Patient"."Insurance" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, insuranceid)
-DO NOTHING
+DO UPDATE
+  SET
+    name = EXCLUDED.name,
+    address = EXCLUDED.address,
+    city = EXCLUDED.city,
+    state = EXCLUDED.state,
+    zipcode = EXCLUDED.zipcode,
+    phone = EXCLUDED.phone,
+    fax = EXCLUDED.fax,
+    neicid = EXCLUDED.neicid,
+    neaid = EXCLUDED.neaid
 """
 
 #Queries for Patient.Operatory
@@ -292,7 +359,18 @@ INSERT INTO "Patient"."Operatory" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, noteid)
-DO NOTHING
+DO UPDATE
+  SET patientid = EXCLUDED.patientid,
+    dateentered = EXCLUDED.dateentered,
+    userid = EXCLUDED.userid,
+    notetype = EXCLUDED.notetype,
+    notedesc = EXCLUDED.notedesc,
+    eodsequence = EXCLUDED.eodsequence,
+    status = EXCLUDED.status,
+    claimid = EXCLUDED.claimid,
+    responsibleparty = EXCLUDED.responsibleparty,
+    trannum = EXCLUDED.trannum
+
 """
 
 #Queries for Patient.Patient
@@ -320,9 +398,14 @@ SELECT w.*
 FROM CTE_Exception AS w
 LEFT JOIN "Patient"."Employer" AS e
   ON w.clinicid = e.clinicid AND w.employerid = e.employerid
-WHERE e.employerid IS NOT NULL
+WHERE (w.employerid IS NULL OR e.employerid IS NOT NULL)
 ON CONFLICT (clinicid, patientid)
-DO NOTHING
+DO UPDATE
+  SET
+    responsibleparty = EXCLUDED.responsibleparty,
+    status = EXCLUDED.status,
+    dateentered = EXCLUDED.dateentered,
+    employerid = EXCLUDED.employerid
 """
 PatientPatientINSERT = 'INSERT INTO "Patient"."Patient" VALUES {0} ON CONFLICT (clinicid, patientid) DO NOTHING'
 PatientPatientFilter = 'WHERE patient_id > (SELECT MAX(patient_id)-200 FROM patient)'
@@ -355,10 +438,14 @@ LEFT JOIN "Clinic"."ReferralType" rt
   ON w.clinicid = rt.clinicid AND w.referralid = rt.referralid
 LEFT JOIN "Patient"."Patient" p
   ON w.clinicid = p.clinicid AND w.patientid = p.patientid
-WHERE rt.referralid IS NOT NULL
+WHERE (w.referralid IS NULL OR rt.referralid IS NOT NULL)
 AND p.patientid IS NOT NULL
-ON CONFLICT (clinicid, patientid, referralid)
-DO NOTHING
+ON CONFLICT (clinicid, patientid)
+DO UPDATE
+  SET
+    patientreferral = EXCLUDED.patientreferral,
+    providerreferral = EXCLUDED.providerreferral,
+    eodsequence = EXCLUDED.eodsequence
 """
 
 #Queries for Patient.TreatmentItems
@@ -386,17 +473,18 @@ FROM "Patient"."TreatmentItems")
 INSERT INTO "Patient"."TreatmentItems" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
-LEFT JOIN "Patient"."Patient" rt
-  ON w.clinicid = rt.clinicid AND w.patientid = rt.patientid
 LEFT JOIN "Patient"."Patient" p
   ON w.clinicid = p.clinicid AND w.patientid = p.patientid
 LEFT JOIN "Patient"."TreatmentPlan" tp
   ON w.clinicid = tp.clinicid AND w.treatmentid = tp.treatmentid
-WHERE rt.patientid IS NOT NULL
-AND p.patientid IS NOT NULL
+WHERE p.patientid IS NOT NULL
 AND tp.treatmentid IS NOT NULL
 ON CONFLICT (clinicid, treatmentid, lineid)
-DO NOTHING
+DO UPDATE
+  SET
+    patientid = EXCLUDED.patientid,
+    claimid = EXCLUDED.claimid,
+    sortorder = EXCLUDED.sortorder
 """
 
 #Queries for Patient.TreatmentPlan
@@ -432,7 +520,13 @@ LEFT JOIN "Provider"."Provider" pro
 WHERE p.patientid IS NOT NULL
 AND pro.providerid IS NOT NULL
 ON CONFLICT (clinicid, treatmentid)
-DO NOTHING
+DO UPDATE
+  SET
+    patientid = EXCLUDED.patientid,
+    userid = EXCLUDED.userid,
+    treatmentdesc = EXCLUDED.treatmentdesc,
+    status = EXCLUDED.status,
+    dateentered = EXCLUDED.dateentered
 """
 
 #Queries for Provider.Position
@@ -452,7 +546,10 @@ INSERT INTO "Provider"."Position" AS ca
 SELECT w.*
 FROM CTE_Exception AS w
 ON CONFLICT (clinicid, positionid)
-DO NOTHING
+DO UPDATE
+  SET
+    positiondesc = EXCLUDED.positiondesc,
+    securityid = EXCLUDED.securityid
 """
 
 #Queries for Provider.Provider
@@ -487,7 +584,17 @@ FROM CTE_Exception AS w
 LEFT JOIN "Provider"."Position" AS p
   ON w."ClinicID" = p.clinicid AND w.positionid=p.positionid
 ON CONFLICT ("ClinicID",providerid)
-DO NOTHING
+DO UPDATE
+  SET
+    firstname = EXCLUDED.firstname,
+    lastname = EXCLUDED.lastname,
+    hiredate = EXCLUDED.hiredate,
+    collectiongoto = EXCLUDED.collectiongoto,
+    providerinsurance = EXCLUDED.providerinsurance,
+    positionid = EXCLUDED.positionid,
+    email = EXCLUDED.email,
+    socialsecurity = EXCLUDED.socialsecurity,
+    birthdate = EXCLUDED.birthdate
 """
 
 #Queries for Trans.InsuranceClaim
@@ -527,7 +634,17 @@ LEFT JOIN "Provider"."Provider" pro
 WHERE p.patientid IS NOT NULL
 AND pro.providerid IS NOT NULL
 ON CONFLICT (clinicid, claimid)
-DO NOTHING
+DO UPDATE
+  SET
+    statementnum = EXCLUDED.statementnum,
+    patientid = EXCLUDED.patientid,
+    datecreated = EXCLUDED.datecreated,
+    providerid = EXCLUDED.providerid,
+    primaryemployerid = EXCLUDED.primaryemployerid,
+    primaryinsuranceid = EXCLUDED.primaryinsuranceid,
+    responsiblepartyid = EXCLUDED.responsiblepartyid,
+    relationship = EXCLUDED.relationship,
+    claimtype = EXCLUDED.claimtype
 """
 
 #Queries for Trans.InsurancePaid
@@ -558,7 +675,11 @@ LEFT JOIN "Trans"."InsuranceClaim" ic
   ON w.clinicid = ic.clinicid AND w.claimid = ic.claimid
 WHERE ic.claimid IS NOT NULL
 ON CONFLICT (clinicid, claimid)
-DO NOTHING
+DO UPDATE
+  SET
+    submittedtotal = EXCLUDED.submittedtotal,
+    primarypaid = EXCLUDED.primarypaid,
+    secondarypaid = EXCLUDED.secondarypaid
 """
 
 #Queries for Trans.PlannedServices
@@ -566,7 +687,7 @@ TransPlannedServicesES = """
 SELECT
 	patient_id,
 	line_number,
-	service_code,
+	UPPER(service_code) AS service_code,
 	sequence,
 	provider_id,
 	date_planned,
@@ -596,7 +717,16 @@ LEFT JOIN "Provider"."Provider" pro
 WHERE p.patientid IS NOT NULL
 AND pro.providerid IS NOT NULL
 ON CONFLICT (clinicid, patientid, lineid)
-DO NOTHING
+DO UPDATE
+  SET
+    servicecode = EXCLUDED.servicecode,
+    sequence = EXCLUDED.sequence,
+    providerid = EXCLUDED.providerid,
+    dateplanned = EXCLUDED.dateplanned,
+    status = EXCLUDED.status,
+    linedesc = EXCLUDED.linedesc,
+    sortorder = EXCLUDED.sortorder
+
 """
 
 #Queries for Trans.TransactionDetail
@@ -636,9 +766,17 @@ LEFT JOIN "Provider"."Provider" pro
   ON w.clinicid = pro."ClinicID" AND w.providerid = pro.providerid
 WHERE th.trannum IS NOT NULL
 AND pat.patientid IS NOT NULL
-AND pro.providerid IS NOT NULL
+AND (w.providerid IS NULL OR pro.providerid IS NOT NULL)
 ON CONFLICT (clinicid, trannum, detailid)
-DO NOTHING
+DO UPDATE
+  SET
+    patientid = EXCLUDED.patientid,
+    userid = EXCLUDED.userid,
+    providerid = EXCLUDED.providerid,
+    collectionsgoto = EXCLUDED.collectionsgoto,
+    dateentered = EXCLUDED.dateentered,
+    amount = EXCLUDED.amount,
+    appliedto = EXCLUDED.appliedto
 """
 
 #Queries for Trans.TransactionHeader
@@ -649,7 +787,7 @@ SELECT
 	resp_party_id,
 	amount,
 	tran_date,
-	service_code,
+	UPPER(service_code) AS service_code,
 	paytype_id,
 	adjustment_type,
 	statement_num,
@@ -684,7 +822,7 @@ LEFT JOIN "Clinic"."Services" serv
    ON w.clinicid = serv.clinicid AND w.servicecode = serv.servicecode
 WHERE pro.providerid IS NOT NULL
 AND pat.patientid IS NOT NULL
-AND serv.servicecode IS NOT NULL
+AND (w.servicecode IS NULL OR serv.servicecode IS NOT NULL)
 AND (w.paytypeid IS NULL
      OR EXISTS (SELECT pay.paytypeid
       FROM "Clinic"."Paytype" pay
@@ -696,5 +834,17 @@ AND (w.adjustmentid IS NULL
       WHERE adj.clinicid = w.clinicid
       AND adj.adjustmentid = w.adjustmentid))
 ON CONFLICT (clinicid, trannum)
-DO NOTHING
+DO UPDATE
+  SET
+    amount = EXCLUDED.amount,
+    servicecode = EXCLUDED.servicecode,
+    paytypeid = EXCLUDED.paytypeid,
+    adjustmentid = EXCLUDED.adjustmentid,
+    statementnum = EXCLUDED.statementnum,
+    claimid = EXCLUDED.claimid,
+    impacts = EXCLUDED.impacts,
+    type = EXCLUDED.type,
+    status = EXCLUDED.status,
+    sequence = EXCLUDED.sequence,
+    trandesc = EXCLUDED.trandesc
 """
