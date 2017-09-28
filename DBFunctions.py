@@ -261,14 +261,14 @@ def BuildInsertPGTemp(GrabQuery,TempTable,CentralTable,TempCompare,StartRange=No
 	try:
 		ins = PGInsert(TempCompare) 
 		if ins == True:
-			print("%s Insert Success" % CentralTable)
+			print("%s: Insert Success" % CentralTable)
 			print('%s execution time' % (time.time()-starttime))
 		else:
 			raise
 	except:
 		return print("Failed to INSERT")
 	#print(PGSelect(tempCounter))
-	#PGExecute(tempDrop)
+	PGExecute(tempDrop)
 
 #Test for failing Inserts
 def BuildInsertTest(GrabQuery,InsertQuery,StartRange=None,EndRange=None):
