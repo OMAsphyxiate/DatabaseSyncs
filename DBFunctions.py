@@ -268,7 +268,7 @@ def BuildInsertPGTemp(GrabQuery,TempTable,CentralTable,TempCompare,StartRange=No
 	except:
 		return print("Failed to INSERT")
 	#print(PGSelect(tempCounter))
-	PGExecute(tempDrop)
+	#PGExecute(tempDrop)
 
 #Test for failing Inserts
 def BuildInsertTest(GrabQuery,InsertQuery,StartRange=None,EndRange=None):

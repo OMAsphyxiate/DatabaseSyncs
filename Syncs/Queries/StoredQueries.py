@@ -23,7 +23,7 @@ DO NOTHING
 #Queries for Clinic.AppointmentType
 ClinicAppointmentTypeES = 'SELECT type_id, description, amount, appt_minutes FROM appt_types'
 ClinicAppointmentTypeINSERT = 'INSERT INTO "Clinic"."AppointmentType" VALUES {0} ON CONFLICT (clinicid, typeid) DO NOTHING'
-ClinicAppointmentTempCompare = """
+ClinicAppointmentTypeTempCompare = """
 WITH CTE_Exception AS(
 SELECT *
 FROM "Temp"."AppointmentType"
