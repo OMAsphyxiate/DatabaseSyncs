@@ -261,7 +261,7 @@ def BuildInsertPGTemp(GrabQuery,TempTable,CentralTable,TempCompare,StartRange=No
 	try:
 		ins = PGInsert(TempCompare) 
 		if ins == True:
-			print(HostFail or "Insert Success, No Failed Connections")
+			print("%s Insert Success" % CentralTable)
 			print('%s execution time' % (time.time()-starttime))
 		else:
 			raise
