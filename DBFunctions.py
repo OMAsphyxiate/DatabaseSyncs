@@ -348,7 +348,7 @@ def ReportCreate(ReportTable, ReportView):
 	CreateReportTable = 'CREATE TABLE {0} AS (SELECT * FROM {1})' #Create table from VIEW
 	checker = PGSelect(CheckExist)
 	if checker[0][0] == 1:
-		PGExecute(DropReport)
+		PGExecute(DropReportTable)
 	PGExecute(CreateReportTable.format(ReportTable,ReportView))
 
 #Internal Functions
