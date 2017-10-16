@@ -341,6 +341,16 @@ def TempTableTest(GrabQuery,TempTable,CentralTable,StartRange=None,EndRange=None
 	PGInsert(injectionString) #Insert ES data into Temporary Table
 	print('%s execution time' % (time.time()-starttime))
 
+#Create Tables from Report Views for POSTGRESQL Data Studio use
+def ReportCreate(ReportTable, ReportView):
+	CheckExist = CheckTemp.format(ReportTable) #Check if Report Table exists
+	DropReportTable = DropTemp.format(ReportTable) #Drop Table
+	CreateReportTable = 'CREATE TABLE {0} AS (SELECT * FROM {1})' #Create table from VIEW
+	checker = PGSelect(CheckExist)
+	if checker[0][0] == 1:
+		PGExecute(DropReport)
+	PGExecute(CreateReportTable.format(ReportTable,ReportView))
+
 #Internal Functions
 #Check to see if all ES Clinics can be connected
 def ESCheck():
